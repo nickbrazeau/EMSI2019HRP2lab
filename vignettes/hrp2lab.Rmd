@@ -652,9 +652,30 @@ left_join(pop1, pop2, by = "time") %>%
 
 On your own, alter the simulation (e.g. vary EIR, etc.). How does the incidene difference plot change? What should you tell your Ministry of Health Official friend?
    
-One thing to consider is the "cost" of a missed infection (e.g. an individual with _hrp2_ deleted parasites that was misdiagnosed by RDT, a "false-negative"), which is not reflected in the incidence plot above. Let's look at that below ()
-   
-   
+One thing to consider is the "cost" of a missed infection (e.g. an individual with _hrp2_ deleted parasites that was misdiagnosed by RDT, a "false-negative"), which is not reflected in the incidence plot above. Let's look at that below (under the assumption that no cases were missed by microscopy under our model). 
+
+```{r}   
+
+ret %>% 
+  dplyr::filter(pop == 1) %>% # assume microscpy had no missed cases
+  dplyr::mutate(missedprop = pfinc * hrp2prevmono) %>% 
+  ggplot() +
+  geom_line(aes(x=time, y=missedprop), color = "blue") + 
+  xlab("Times (Days)") + ylab("hrp2-only Incidence") + 
+  ggtitle("Incidence of hrp2 only infected individuals (missed case proportion)") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust=0.5),
+      legend.position = "bottom"
+    )
+
+
+```
+
+Now taking into account the "cost" of a potential missed infection, does your response to our Ministry of Health friend change?
+
+
+
 
 Thank you for completing this lab!! 
 
