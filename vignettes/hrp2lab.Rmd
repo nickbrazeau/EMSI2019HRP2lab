@@ -1,5 +1,7 @@
 ---
-title: "Untitled"
+title: 'EMSI2019 _hrp2_ Deletion Epidemiology Lab'
+author: "(Nick Brazeau), OJ Watson, Jonathan Parr, Steve Meshnick"
+date: "May 21, 2019"
 output:
   html_document:
     highlight: textmate
@@ -12,6 +14,177 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r setup, include = FALSE, eval=T}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = T, eval = T, message = F, warning = F,
+                      fig.align = "center",
+                      out.extra = 'class="plot"')
+
+```
+
+<!-- Output document and get some style pointers taken largely from this stackexchange answer below
+with a few minor tweaks to the js code 
+https://stackoverflow.com/questions/37755037/how-to-add-code-folding-to-output-chunks-in-rmarkdown-html-documents -->
+
+<script src="js/hideAll.js"></script>
+
+# Acknowledgements
+The `hrp2malaRia` package was written by [OJ Watson](https://github.com/OJWatson), a PhD Student with the Imperial College of London Mathematical Modeling group. This package was used in his recent [Elife Publication](https://www.ncbi.nlm.nih.gov/pubmed/28837020), Watson OJ _et al._ 2017, **Modelling the drivers of the spread of Plasmodium falciparum hrp2 gene deletions in sub-Saharan Africa**. The udeas and much of theory that we will be discussing today was spear-headed by UNC Physician-Scientist, Jonathan Parr. 
+    
+Additional thanks to Dayne Filer, Mike Fliss, and Sara Levintow for hacks.
+  
+# Overview
+
+## Scenario
+You are an Officer in the CDC's elite Epidemic Intelligence Service (EIS) Malaria Branch and are called one day by a concerned ministry of health official in a Sub-Saharan Africa stating that their hospitals have seen several patients that appear to have malaria but had negative rapid diagnostic tests. They have read recent reports of _hrp2_ deletions and wonder if you can model this scenario and predict where they should be on the lookout for _hrp2_ deletions. 
+
+
+## Using this document
+
+* R code chunks have a grey background 
+* Outputs for all R code can be "toggled" to the right of all code chunks
+* While you can copy and paste this code into R, you will learn faster if you type out the commands yourself. 
+* I have asked that you install several packages, including: `remotes`. `tidyerverse`, `RColorBrewer`, and `cowplot`. We will be using `remotes` to install some packages from Github as well. 
+* Throughout the document, I have placed questions indicated by a line. As before, we suggest that you work on this with a partner, and answer the questions below (space is given, indicated by a line).  But feel free to work on your own if you prefer. We will likely break frequently to discuss results. 
+
+
+
+
+
+# Epidemiological & Biological Context
+
+## Malaria Burden
+
+_P. falciparum_ malaria is an infectious disease with a huge global burden, primarily concentrated in Africa. For an interactive map of _P. falciparum_ prevalence, see the [Malaria Atlas Project](https://map.ox.ac.uk/explorer/#/). 
+<center>
+<img src="figures/pfmap.png" width="700px" height = "500px">
+<center>
+
+## Malaria Life Cycle 
+
+The malaria life cycle is complex with several different stages. For the purposes of this exercise, it is only important to note that the malaria parasite is transmitted by a mosquito vector that infects the human-host.
+
+
+  
+## Malaria Detection
+
+In clinical and field settings, malaria is often diagnosed with either the use of light microscopy or rapid diagnostic tests (RDTs). In both cases, a finger-prick of blood is taken from patients and used to screen for malaria. Confirmation of infection by microscopy is made with direct visualization of the parasite by an expert microscopist while RDTs provide a "yes/no" result and can be performed by relatively anyone. 
+  
+RDTs detect parasite antigens (e.g. a parasite-specific marker) from the patient's peripheral blood. In the case of the _P. falciparum_, the vase majority of _Pf_-RDTs detect a _P. falciparum_ specific protein, histidine-rich protein 2 (hrp2).    
+  
+However, recent evidence has accumulated to suggest that _P. falciparum_ parasites have undergone selection for hrp2-gene deletions, making them no longer detectable by many RDTs ("stealth parasites"). In theory, by avoiding detection, parasites can then remain untreated and have a higher likelihood of spreading. 
+  
+Note, for the purposes of our discussions, we will ignore differences between the lower-limits of detection (and sensitivity/speficity) of these two diagnostic modalities. 
+  
+<!-- Note, here I am using some css code to make columns and insert figures -->
+
+<center>
+<img src="https://upload.wikimedia.org/wikipedia/commons/f/f0/Malaria_rapid_diagnostic_test.jpg" width="250px" height = "250px">
+<img src="figures/microscopy.png" width="150px" height = "100px">
+<img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Malaria_rapid_diagnostic_test_3.jpg" width="250px" height = "200px">
+<center>
+
+
+
+## Prevalence & Multiplicity of Infection
+In regions of high malaria prevalence, it is common for individuals to experience numerous innocuous bites every single evening. For example, in the Democratic Republic of the Congo, it is estimated that the average individual experiences [60-400 infectious mosquito bites/person/year*](https://www.pmi.gov/docs/default-source/default-document-library/malaria-operational-plans/fy-2018/fy-2018-democratic-republic-of-the-congo-malaria-operational-plan.pdf?sfvrsn=5). As a result of this intense burden, individuals can be infected with numerous different strains of malaria (termed "superinfection" -- note, for the purpose of this thought exercise we will ignore "co-transmission" events). 
+  
+* The number of infectious moquito bites per person per year is often termed the entomological innoculation rate (EIR) and is a measure of transmission intensity.
+  
+  
+<center><img src="figures/superinfection_figure.png" width="400px" height = "400px"><center>
+
+
+
+# Exercise Objectives
+In this lab, we are going to explore different scenarios where hrp2 deletions are expected to increase in frequency (e.g. be "selected for") or decrease in frequency (e.g. be "selected against").
+**Blah. Blah.**
+
+
+## Hypothesis Generating
+Before we began, discuss the following points with your neighbors (or as a group):   
+
+1. If you were asked to a design an antigen-based detection method, what type of antigen would you pick (e.g. from an evolutionary point of view, what type of proteins/markers would be best)? _________________________________________________________
+
+2. Do you expect for parasite prevalence, and particularly superinfections, to affect the prevalence of hrp2 deletions?  
+    * Why (or Why not)?   _____________________________
+    * If you have multiple infections, what may be required of all them to go undetected? _______________________
+    
+3. How can "silent" phenotypes be produced?
+    * What are ways for a protein (e.g. a product of a gene) to be "removed"? _____________________
+    * Would you expect a "fitness" cost be greater for a large deletion, a small deletion, or a silencing point mutation? _______________________________________
+
+
+
+
+
+## Model Specification
+In the previous exercise led by Dr. Nunn, you first used a determinist SIR model to analyze the spread of a "childhood disease" through a susceptible population. You then extended your deterministic SIR model to include fluctuations in the population size through births and deaths (e.g. a demographic model). Next, you modeled the uncertainty and the variation in your model through simulation using a stochastic approach. As a reminder, stochastic individual-based models essentially follow indiviudals through the different compartments and record their states/times as they move through the model. This explicitly models individual-level heterogeneity and allows for several possible extension/fine-level manipulations (e.g. see [network stochastic models](http://statnet.github.io/tut/NewNet.html), etc.) In short, a deterministic model is a "closed-system" where we will arrive at the same answer every time (given the same parameters, initial conditions, etc). In contrast, a stochastic model let's us simulate many possible iterations of our model and directly express the randomness (or really uncertainty) in our model paramters and outcome. 
+
+In this exercise, we are going to use an individual-based, stochastic malaria transmission model that is an extension of the "Imperial Model" (see OJ's [Material & Methods](https://www.ncbi.nlm.nih.gov/pubmed/28837020)) for a full description via Griffin et al. 2014, 2015, 2016) OJ describes the Imperial Model fully.    
+  
+Refer to Figure 5 from OJ's [manuscript](https://www.ncbi.nlm.nih.gov/pubmed/28837020). What kind of Compartment Model is the "hrp2-Imperial Model"? ______________________   
+  
+Note, for the purpose of this exercise, we are going to ignore some of the (beautiful) complexities of the model and instead talk about this model in a Susceptible-Infected-Recovered-Susceptible framework (i.e. the U,A,D compartments are collapsed into the "Infected" category and Recovered corresponds to the period of active treatment/prophylaxis -- the T,P compartments -- when individusls are "immune"). What is another scenario that SIRS models can be applied to (hint: think about your tetanus vaccines)? __________________  
+We are going to be focusing on a few adaptations of "hrp2-Imperial Model", namely:  
+
+1. The addition of the parameter, $f\epsilon_T$, or "the probability that the clinical case yields a positive diagnostic result and subsequently receives treatment". Essentially, this parameter accounts for our "belief" in the RDTs by saying "given that you have clinical disease, will you go get treatment based on your RDT result"*. 
+2. The contribution of _hrp2_ deleted versus wildtype strains to the mosquito infectious reservior (i.e. $C_D$, $C_U$, $C_T$).
+3. The fitness of the _hrp2_ deleted versus wildtype strains. This parameter is modeled directly into the probability that a mosquito can transmit an _hrp2_ deleted parasite. Put simply, this essentially follows the classical defintion of fitness, as a probability that a given "gene" (here an hrp2 gene deletion) is passed on in subsquent generations. 
+
+
+
+For each of the parameters listed above, which SIRS compartment will be most affected? ________________
+  
+  
+\* Note, for the purpose of this exercise, we will ignore cross-reactivity of the _hrp3_ epitope by setting
+$\epsilon$ to 0 and set RDT adherence to 100%. Put simply, this means that if an individual only contains _hrp2_ deleted parasites, they will not receive treatment (but if they contain any wildtype parasites, they may receive treatment depending on their probability of seeking treatment).
+
+
+### Variables of Interest
+This is copied from the [README]() that accompanies the `hrp2malaria` package instructions. Please note, this is a subset of potential input variables to change and the output variables of interest. 
+
+
+#### Input Variables to Change
+
+| Variable | Description                                                                   |
+|----------|-------------------------------------------------------------------------------|
+| *years* | Number of years simulation is run for. 20 years will be usually long enough to see hrp2 selection at low EIRs. |
+| *N* | Population size. The model is stochastic and so a larger N will enable clearer patterns to be found in model outputs, however, they will take longer to run. Population of 2000 should be a good balance of speed and clarity for demonstration purposes. For the analysis in the eLife modelling paper N was set to 100,000 |
+| *strains.0* | Starting ratio of strains in the population. This number must be an integer. The default is set to 10, which will mean that on initialisation there will be roughly 10 times as many wild type strains as there are hrp2 deleted. |
+| *EIR* | Annual EIR, provided as a fraction, i.e. the default EIR of 20/365 represents an EIR of 20. |
+| *ft* | Frequency of treatment being sought upon developing clinical disease. Must be a number between 0 and 1, with the default being 0.4, i.e. 40% of cases seek treatment. |
+| *rdt.det* | The probability that an individual only infected with hrp2-deleted strains still produces a positive RDT. The default is 1, i.e. no selective pressure. For the eLife paper we used a value of 0.25 that represented the approximate 25% chance that a positive RDT would still be produced due to hrp3 protein epitope cross reactivity |
+| r*dt.nonadherence* | The probability that the result of an RDT is ignored, i.e. a negative RDT due to hrp2 deletions will still be treated. Default = 0, and in the eLife paper we used a value of 10% based on data collected by the WHO. |
+| *microscopy.use* | The proportion of cases that are tested by microscopy rather than RDT. Default = 0, and in the eLife paper we tested the impact of 30% of cases being diagnosed by microscopy, representing the ~70% of cases diagnosed being diagnosed by RDTs in 2014. |
+| *fitness* | Comparative fitness of hrp2 deleted parasites. Default = 1, which mean the wild type is equally as likely to be passed on to mosquitoes as an hrp2 deleted parasite. 0.8 results in the hrp2 deleted strain being 80% likely to be passed on, whereas a value of 1.2 would mean it is 20% more likely. |
+
+
+#### Output Variables of Interest
+
+| Variable | Description                                                                   |
+|----------|-------------------------------------------------------------------------------|
+| *S.Times* | The timing of when the simulated population is sampled, i.e. the time at which all other series variables (variables that begin S.) were collected |
+| *S.Prev.All* | The prevalence of malaria within the whole population |
+| *S.Prev.05* | The prevalence of malaria within under 5s |
+| *S.N.Dels* | The proportion of all parasites that are hrp2 deleted |
+| *S.N.Dels.05* | The proportion of all parasites within under 5s that are hrp2 deleted |
+| *S.Incidence* | The daily clinical incidence of malaria. Multiply this by 365 to have the expected number of clinical cases of malaria a person within the whole population is expected to have in a year |
+| *S.Incidence.05* | The daily clinical incidence of malaria. Multiply this by 365 to have the expected number of clinical cases of malaria a child under the age of 5 is expected to have in a year |
+| *S.Prev.Mono.D* | The proportion of infected individuals who are only infected with hrp2 deleted parasites |
+| *S.Prev.Mono.D.05* | The proportion of infected individuals under the age of 5 who are only infected with hrp2 deleted parasites |
+
+
+#### Our Simulated World
+For the purpose of the exercise, we are going to make some more simplifying assumptions. As noted above, we will set the models so that if an individual only contains _hrp2_ deleted parasites, they will not have a positive RDT, and therefore, will not receive treatment (but if they contain any wildtype parasites, they may receive treatment depending on their probability of seeking treatment). We are also going to set our populations and time steps to 2,000 individuals and 20 years, respectively.   
+However, we will vary the diagnostic modalities that populations use, the transmission intensity (EIR), and the fitness of the parasites. 
+  
+  
+# Let's Get Started
+## Installation
+First you will need to make sure that you have the `remotes` packaged installed. This is a wonderful package that allows for _R developers_ to install code from various repositories as a corner-stone of reproducible research. If you don't already have this package, type `install.packages("remotes")` into your console (quick download). We will now download the `hrp2malaria` package that is the foundation of this lab. 
 ```{r}
 # check to make sure user has the needed packages; if missing, install for them 
 list.of.packages <- c("tidyverse", "remotes", "cowplot", "RColorBrewer")
@@ -175,7 +348,7 @@ paralleltime
 ```
 
 Now let's visualize our plots of the proportion of _hrp2_ deleted parasites over time.
-```{r, fig.width = 11, fig.height = 20}
+```{r, fig.width = 11, fig.height = 15}
 
 # note, I wrote this function for you, it returns a ggplot
 plot.scenario1.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
@@ -223,49 +396,6 @@ cowplot::plot_grid(plot.scenario1.run1,
 * Was there anything unusual about your plots? Why was it unusual? _______________________________
 
 Try running the models for a sample size of 100,000 (like the ELife paper). Note, this will take some time but the larger N should elicit a clearer/more consistent pattern.    
-
-
-
-Now let's visualize our plots of the parasite Incidence over time. Incidence can be defined as the number of susceptible individuals that acquire an infection (at time $t$). 
-
-```{r, fig.width = 11, fig.height = 20}
-
-# note, I wrote this function for you, it returns a ggplot
-iplot.scenario1.run1 <- plotincmodels(pop1 = hrp2map$results[[1]],
-                                      pop2 = hrp2map$results[[2]],
-                                      pop3 = hrp2map$results[[3]],
-                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use")) 
-
-
-iplot.scenario1.run2 <- plotincmodels(pop1 = hrp2map$results[[4]],
-                                      pop2 = hrp2map$results[[5]],
-                                      pop3 = hrp2map$results[[6]],
-                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use"))
-
-
-iplot.scenario1.run3 <- plotincmodels(pop1 = hrp2map$results[[7]],
-                                      pop2 = hrp2map$results[[8]],
-                                      pop3 = hrp2map$results[[9]],
-                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use"))
-                                      
-
-
-# Plot them together
-cowplot::plot_grid(iplot.scenario1.run1, 
-                   iplot.scenario1.run2,
-                   iplot.scenario1.run3,
-                   ncol=1)
-
-
-
-```
-
-** Questions for Simulation 1 with regards to Incidence **
-
-* How did difference in diagnostic modality affect the overall incidence of _P. falciparum_ malaria? __________________
-* How are incidence and proportion of _hrp2_ deletions related in these populations (in expectation)? __________________________________
-
-* Why does that matter? _______________________________
 
 
 
@@ -331,10 +461,6 @@ cowplot::plot_grid(plot.scenario2.run1, plot.scenario2.run2,ncol=1)
   * Why (or why not) do you think that may be the case? ___________________________
   * What are the differenes in a selective pressure vs. fitness? _________________________
 * Can a parasite that is less fit still propagate through the population (call forward to Dr. Mitchell/Dr. Nunn's lecture) ? _______________________________   
-
-
-**_If you have time, consider plotting the incidence for these simulations and compare them to scenario 1_**.
-
 
 
 
@@ -404,27 +530,134 @@ cowplot::plot_grid(plot.scenario3.run1, plot.scenario3.run2,ncol=1)
 
 
 
-Now let's visualize our plots of the parasite Incidence over time. Incidence can be defined as the number of susceptible individuals that acquire an infection (at time $t$).   
-
-Without looking at the models below, which population is going to have the highest incidence? ________________ 
 
 
-```{r, fig.width = 11, fig.height = 20}
+#  Incidence, Prediction, and Inference
+You've now started to answer our Ministry of Health Official's question, as we have shown that regions of low malaria transmission (low EIR) and high proportion of RDT use are predictive of _hrp2_-deletion fixation (Watson et al. 2017). In addition, we have shown that a large fitness cost associated with the _hrp2_-deletion (and a low starting frequency of the _hrp2_-deletion strain proportion) leads to rapid decay of the _hrp2_-deleted phenotype (Watson et al. 2017). As a result, we think that these _hrp2_-deleted parasites are viable and potentially problematic in low-endemicity areas (of note, OJ's 2017 predictions have been pretty accurate to date, particularly in Eritrea and other regions in Northern Africa).    
 
-iplot.scenario3.run1 <- plotincmodels(pop1 = hrp2map$results[[1]],
-                                      pop2 = hrp2map$results[[2]],
-                                      pop3 = hrp2map$results[[3]],
-                                      labels = c("EIR 1", "EIR 10", "EIR 100")) 
+  
+However, our Ministry of Health Official asks the next logical question: "Should I no longer be using RDTs"?  
 
-iplot.scenario3.run2 <- plotincmodels(pop1 = hrp2map$results[[4]],
-                                      pop2 = hrp2map$results[[5]],
-                                      pop3 = hrp2map$results[[6]],
-                                      labels = c("EIR 1", "EIR 10", "EIR 100")) 
+It is now a good time to note that this question mixes prediction and causal inference, both vast fields of study (the latter being the UNC Epi Department's forte). We are going to glaze over a huge number of assumptions and caveats (which I apologize for). 
+  
 
-cowplot::plot_grid(iplot.scenario3.run1, iplot.scenario3.run2, ncol=1)
+Up until this point, we have been modeling the frequency (or proportion) of _hrp2_ parasites in each population. However, our question now asks about the utility of RDTs in a setting of _hrp2_ deletions. As such, we will take the "worst" possible scenario and compare two populations in a low EIR setting, where one population only uses RDT (and seeks treatment based on the result) and the other only uses microscopy (and also seeks treatment). We will then focus in on differences in incidence between these two populations. 
 
+```{r}
+# I am only going to do one run, but feel free to do more
+
+incidencemap <- data.frame(run = 1,
+                           N=2000, 
+                           years=20, 
+                           strains.0 = 10,
+                           rdt.nonadherence = 0, 
+                           EIR=1/365, 
+                           microscopy.use = c(0,1),
+                           rdt.det = 0,
+                           fitness = 1)
+
+incidencemap$results <- furrr::future_pmap(incidencemap[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
+            hrp2malaRia::hrp2_Simulation)
+
+```
+
+Let's now pull out the incidence data. 
+
+```{r}
+
+ret <- EMSI2019hrp2lab::extracthrp2results(pop1 = incidencemap$results[[1]],
+                                           pop2 = incidencemap$results[[2]])
+
+```
+
+We can open it up to see what we extracted. Note, the _pfinc_ column is from the `hrp2malaRia` _.$S.Incidence_ column. 
+```{r}
+glimpse(ret)
+```
+
+
+```{r, fig.width = 11, fig.height = 8}
+
+ret %>% 
+  ggplot(.) +
+  geom_line(aes(x=time, y=pfinc, group = factor(pop), colour=factor(pop))) +
+  xlab("Times (Days)") + ylab("Incidence") + 
+  scale_color_manual(name = "", labels = c("Only RDT use", "Only Microscopy Use"), values = RColorBrewer::brewer.pal(8, "Set1")) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust=0.5),
+      legend.position = "bottom"
+    )
+
+```
+
+** Preliminary Questions with regards to Incidence **
+* Why is the incidence (through time) for both populations relatively low? How could you increase the incidence dramatically (by changing one parameter in the model code above)? _______________________
+* Why are there fluctuations in incidence through time? ________________  
+
+To answer this question, it may help to subset to just a year of "time". You could do this by adding the following to the code chunk above:   
+
+>
+ret %>% 
+  dplyr::filter(time < 365) %>% # this would be the first year
+  ggplot(.) + ...
+>  
+  
+Without going into too much detail, incidence is indexed by time (this is an "open population"", so we can't use "risk"). As a result, we can model the incidence difference between these two populations at each time-point in order to get a sense of how many more infections the "Only RDT Use" population has as compared to "Only Microscopy Use". 
+
+```{r, fig.width = 11, fig.height = 8}
+
+days <- seq(0, (365*20))
+
+pop1 <- ret %>% 
+  dplyr::filter(pop == 1)
+
+pop2 <- ret %>% 
+  dplyr::filter(pop == 2)
+
+# quick local linear interpolation to get an incidence for every single day of the 20 years (not just the S.times)
+pop1 <- approx(x = pop1$time, y = pop1$pfinc, xout = days, method = "linear") %>% 
+  cbind.data.frame() %>% 
+  dplyr::rename(time = x, pfinc = y) %>% 
+  dplyr::mutate(pop = 1)
+
+pop2 <- approx(x = pop2$time, y = pop2$pfinc, xout = days, method = "linear") %>% 
+  cbind.data.frame() %>% 
+  dplyr::rename(time = x, pfinc = y) %>% 
+  dplyr::mutate(pop = 2)
+
+# now let's rejoin and plot the difference
+
+left_join(pop1, pop2, by = "time") %>% 
+  dplyr::mutate(diff = pfinc.x - pfinc.y) %>% 
+  dplyr::filter(!is.na(diff)) %>% # get rid of boundary issues ("cheating, we could do better")
+  ggplot() +
+  geom_line(aes(x=time, y=diff), color = "blue") + 
+  geom_hline(yintercept = 0, color = "red") +
+  xlab("Times (Days)") + ylab("Incidence") + 
+  ggtitle("Incidence Difference between a Population Using only RDTs versus Microscopy") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust=0.5),
+      legend.position = "bottom"
+    )
 
 
 ```
+
+** Questions with regards to Incidence Plot **
+* What is your interpretation of the Incidence Diffference Plot Above? _______________________
+* Can we say these are the cases that are due to RDT use vs Microscopy Use? ________________  
+
+
+On your own, alter the simulation (e.g. vary EIR, etc.). How does the incidene difference plot change? What should you tell your Ministry of Health Official friend?
+   
+One thing to consider is the "cost" of a missed infection (e.g. an individual with _hrp2_ deleted parasites that was misdiagnosed by RDT, a "false-negative"), which is not reflected in the incidence plot above. Let's look at that below ()
+   
+   
+
+Thank you for completing this lab!! 
+
+
 
 

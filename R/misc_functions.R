@@ -25,6 +25,7 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
     ret1 <- data.frame(
       pfinc =    pop1$S.Incidence,
       hrp2prev =  pop1$S.N.Dels,
+      hrp2prevmono = pop1$S.Prev.Mono.D,
       time =      pop1$S.Times,
       pop = 1)
   }
@@ -32,6 +33,7 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
     ret2 <- data.frame(
       pfinc =    pop2$S.Incidence,
       hrp2prev =  pop2$S.N.Dels,
+      hrp2prevmono = pop2$S.Prev.Mono.D,
       time =      pop2$S.Times,
       pop = 2)
 
@@ -40,6 +42,7 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
     ret3 <- data.frame(
       pfinc =    pop3$S.Incidence,
       hrp2prev =  pop3$S.N.Dels,
+      hrp2prevmono = pop3$S.Prev.Mono.D,
       time =      pop3$S.Times,
       pop = 3)
 
@@ -48,6 +51,7 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
     ret4 <- data.frame(
       pfinc =    pop4$S.Incidence,
       hrp2prev =  pop4$S.N.Dels,
+      hrp2prevmono = pop4$S.Prev.Mono.D,
       time =      pop4$S.Times,
       pop = 2)
 
@@ -95,3 +99,5 @@ plotincmodels <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NULL, la
     )
   return(plt)
 }
+
+
