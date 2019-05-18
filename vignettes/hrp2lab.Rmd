@@ -15,12 +15,7 @@ editor_options:
 ---
 
 ```{r setup, include = FALSE, eval=T}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  echo = T, eval = T, message = F, warning = F,
-                      fig.align = "center",
-                      out.extra = 'class="plot"')
+knitr::opts_chunk$set(echo = T, eval = T, message = F, warning = F, out.extra = 'class="plot"', fig.align = "center")
 
 ```
 
@@ -271,7 +266,7 @@ senario1.pop3 <-  hrp2malaRia::hrp2_Simulation(N=2000,
 
 end_time <- Sys.time()
 
-sequentialtime <- start_time - end_time
+sequentialtime <- end_time - start_time
 
 # Now, let's plot these - all veriables that begin with S. are series variables collected over time. 
 # let's plot the first population
@@ -300,7 +295,7 @@ In this **map dataframe**, our parameter names will be columns and our parameter
 Why do you think stochastic models are typically slower to run than deterministic models? _____________________
   
   
-#### Very Advanced Content
+#### More Advanced Content
 We are going to use the `furrr` package to take advantage of the multiple proccessors on your computer (e.g. parallelize the simulations). This is simply for speed. If you are having trouble on your personal computer, you can change the `furrr::future_pmap` commands below to `purrr::pmap` and will get the same result (albiet at a slower pace). 
   
   
@@ -336,7 +331,7 @@ hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt
             hrp2malaRia::hrp2_Simulation)
 
 end_time <- Sys.time()
-paralleltime <- start_time - end_time
+paralleltime <- end_time -  start_time
 
 
 ```
@@ -388,7 +383,7 @@ cowplot::plot_grid(plot.scenario1.run1,
 
 
 
-** Questions for Simulation 1 with regards to _hrp2_ frequency**
+#### Questions for Simulation 1 with regards to _hrp2_ frequency
 
 * How does the difference in diagnostic modality affect the proportion of _hrp2_ deletions? __________________
 * How much variation did you appreciate between runs? __________________________________
@@ -454,7 +449,7 @@ cowplot::plot_grid(plot.scenario2.run1, plot.scenario2.run2,ncol=1)
 ```
 
 
-** Questions for Simulation 2 with regards to _hrp2_ frequency **
+#### Questions for Simulation 2 with regards to _hrp2_ frequency 
 
 * How do the differences fitness affect _hrp2_ frequency? __________________
 * Were these effects greater than the effects of the diagnostic modality (above)? __________________________________
@@ -480,7 +475,7 @@ Again, imagine that there are three populations where all populations start with
 
 * EIR is 100
 
-```{r, fig.width = 11, fig.height = 20}
+```{r, fig.width = 11, fig.height = 15}
 # going to overwrite our old hrp2map and make a new one
 
 hrp2map <- data.frame(scenario = "scnr3",
@@ -520,7 +515,7 @@ cowplot::plot_grid(plot.scenario3.run1, plot.scenario3.run2,ncol=1)
 
 ```
 
-** Questions for Simulation 3 with regards to _hrp2_ frequency **
+#### Questions for Simulation 3 with regards to _hrp2_ frequency
 
 * How do the differences EIR affect _hrp2_ frequency? __________________
   * Do any of the models seem odd (e.g. are any "overwhelmed")? _________________________
@@ -591,18 +586,15 @@ ret %>%
 
 ```
 
-** Preliminary Questions with regards to Incidence **
+#### Preliminary Questions with regards to Incidence 
+
 * Why is the incidence (through time) for both populations relatively low? How could you increase the incidence dramatically (by changing one parameter in the model code above)? _______________________
 * Why are there fluctuations in incidence through time? ________________  
 
-To answer this question, it may help to subset to just a year of "time". You could do this by adding the following to the code chunk above:   
+To answer this question, it may help to subset to just a year of "time". You could do this by adding the following to the code chunk above:  
+`ret %>% dplyr::filter(time < 365) %>% # this would be the first year ggplot(.) + ...`  
 
->
-ret %>% 
-  dplyr::filter(time < 365) %>% # this would be the first year
-  ggplot(.) + ...
->  
-  
+
 Without going into too much detail, incidence is indexed by time (this is an "open population"", so we can't use "risk"). As a result, we can model the incidence difference between these two populations at each time-point in order to get a sense of how many more infections the "Only RDT Use" population has as compared to "Only Microscopy Use". 
 
 ```{r, fig.width = 11, fig.height = 8}
@@ -645,7 +637,8 @@ left_join(pop1, pop2, by = "time") %>%
 
 ```
 
-** Questions with regards to Incidence Plot **
+#### Questions with regards to Incidence Plot 
+
 * What is your interpretation of the Incidence Diffference Plot Above? _______________________
 * Can we say these are the cases that are due to RDT use vs Microscopy Use? ________________  
 
@@ -676,7 +669,7 @@ Now taking into account the "cost" of a potential missed infection, does your re
 
 
 
-
+# End 
 Thank you for completing this lab!! 
 
 
