@@ -1,0 +1,399 @@
+---
+title: "Untitled"
+output:
+  html_document:
+    highlight: textmate
+    theme: lumen
+    toc: yes
+    toc_float: yes
+    toc_depth: 2
+    css: custom.css
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+# check to make sure user has the needed packages; if missing, install for them 
+list.of.packages <- c("tidyverse", "remotes", "cowplot", "RColorBrewer")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
+remotes::install_github("OJWatson/hrp2malaRia")
+remotes::install_github("nickbrazeau/EMSI2019hrp2lab") # hacky way to download this tutorial as a package
+remotes::install_github("DavisVaughan/furrr") # we are going to use this for speed later
+library(hrp2malaRia)
+library(EMSI2019hrp2lab)
+library(furrr)
+library(tidyverse)
+library(RColorBrewer)
+library(cowplot)
+
+set.seed(42) # please don't run this line! 
+```
+
+
+# Scenario 1: Different Diagnostics 
+Imagine that there are three populations with a constant EIR of 1 (reminder, EIR is the entomogical innoculation rate, or the number of infectious mosquito bites per person per year). In addition, all populations start with approximately 10% frequency of hrp2 deletions and hrp2 deleted and wildtype parasites have equal fitness. However, the populations differ by:  
+  
+**Population 1:**
+
+* Only uses rapid diagnostic tests (RDTs) to diagnose malaria
+
+
+**Population 2:**
+
+* Uses RDTs to diagnose 50% of cases and microscopy for the other 50%
+
+**Population 3:**
+
+* Only uses microscopy to diagnose malaria
+
+
+### Output
+As noted above, the `hrp2_Simulation` function returns many results that allow for many different questions to be investigated. For the purpose of our excerise, we will focus on the increase of hrp2 prevalence (`df$S.N.Dels`) over time (`df$S.Times`). 
+  
+Let's run the code (once) and plot the result: 
+
+
+```{r}
+# Simulations take ~1 minute to run on my MacBook Pro (3.1 GHz Intel Core i7)
+# Population 1
+
+# as a side note, let's track how long this takes
+start_time <- Sys.time()
+
+senario1.pop1 <-  hrp2_Simulation(N=2000, 
+                                 years=20, 
+                                 strains.0 = 10,
+                                 rdt.nonadherence = 0, 
+                                 EIR=1/365, 
+                                 microscopy.use = 0, 
+                                 rdt.det = 0, 
+                                 fitness = 1
+)
+# Population 2
+senario1.pop2 <- hrp2_Simulation(N=2000, 
+                                 years=20, 
+                                 strains.0 = 10,
+                                 rdt.nonadherence = 0, 
+                                 EIR=1/365, 
+                                 microscopy.use = 0.5, 
+                                 rdt.det = 0, 
+                                 fitness = 1
+)
+
+
+# Population 3
+senario1.pop3 <-  hrp2_Simulation(N=2000, 
+                                 years=20, 
+                                 strains.0 = 10,
+                                 rdt.nonadherence = 0, 
+                                 EIR=1/365, 
+                                 microscopy.use = 1, 
+                                 rdt.det = 0, 
+                                 fitness = 1
+)
+
+
+end_time <- Sys.time()
+
+sequentialtime <- start_time - end_time
+
+# Now, let's plot these - all veriables that begin with S. are series variables collected over time. 
+# let's plot the first population
+plot(senario1.pop1$S.Times,senario1.pop1$S.N.Dels, xlab = "time (days)", ylab = "hrp2 deletion Frequency", ylim=c(0,1), col="red", type="l", lwd=2)
+# and add the second population
+lines(senario1.pop2$S.Times, senario1.pop2$S.N.Dels,lwd=2, col="blue")
+# and add the third population
+lines(senario1.pop3$S.Times, senario1.pop3$S.N.Dels,lwd=2, col="green")
+# and add our legend
+legend(2000, .25, legend=c("Only RDT use", "50% RDT use", "0% RDT Use"),
+       col=c("red", "blue", "green"), lty=1, cex=0.8,
+       box.lty=2, box.lwd=2)
+
+```
+
+
+
+
+
+### Advanced Content
+Given that this is a stochastic model, there will be run-to-run variability of each model iteration. This variability is important in quantifying our uncertainty of the stochastic process that we are modeling.   
+To get multiple runs of the model, you can simply copy and paste the code above (and rename the output objects [e.g. `r1.2`], as to not overwrite your previous results). Or, we can make a **map** dataframe, where we specify the different parameters we want for each run and use this dataframe as the "captain" calling the "plays".     
+
+In this **map dataframe**, our parameter names will be columns and our parameter options will be cells with each row being its own respective model. Using a **map** file is a cornerstone of functional programming and a high-yield concept for reproducible research. Plus, as Dr. Nunn noted earlier, stochastic models are typically slower to run than deterministic models.  As a result, we now have a need for speed, which is made easier with a **map dataframe** that we can "loop" through. 
+  
+Why do you think stochastic models are typically slower to run than deterministic models? _____________________
+  
+  
+#### Very Advanced Content
+We are going to use the `furrr` package to take advantage of the multiple proccessors on your computer (e.g. parallelize the simulations). This is simply for speed. If you are having trouble on your personal computer, you can change the `furrr::future_pmap` commands below to `purrr::pmap` and will get the same result (albiet at a slower pace). 
+  
+  
+Let's try it out below: 
+
+```{r}
+
+hrp2map <- data.frame(run = c(1,1,1, 2,2,2, 3,3,3), # note you could use rep here (this is for clarity)
+                      N=2000, 
+                      years=20, 
+                      strains.0 = 10,
+                      rdt.nonadherence = 0, 
+                      EIR=1/365, 
+                      microscopy.use = c(0,0.5,1, 0,0.5,1, 0,0.5,1),
+                      rdt.det = 0,
+                      fitness = 1)
+```
+
+Let's look at what we just made: 
+```{r}
+dplyr::glimpse(hrp2map)
+```
+OK, let's run our models and store them in our **map dataframe**. 
+
+
+```{r}
+# note, we have to tell R that scenario and populations aren't parameters that hrp2_Simulation will accept
+future::plan(multiprocess)
+
+start_time <- Sys.time()
+
+hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
+            hrp2_Simulation)
+
+end_time <- Sys.time()
+paralleltime <- start_time - end_time
+
+
+```
+
+Just to prove a point, check out how much faster your code ran in parallel versus sequentially:
+
+```{r}
+sequentialtime
+paralleltime
+```
+
+Now let's visualize our plots of the proportion of _hrp2_ deleted parasites over time.
+```{r, fig.width = 11, fig.height = 20}
+
+# note, I wrote this function for you, it returns a ggplot
+plot.scenario1.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
+                                      pop2 = hrp2map$results[[2]],
+                                      labels = c("Only RDT use", "50% RDT use")) # you need to manually add the labels
+
+# you can manually add a title like this too 
+plot.scenario1.run1 <- plot.scenario1.run1 + ggtitle("hrp2 Simulation Scenario 1, Run 1")
+
+
+# now consider run 2
+plot.scenario1.run2 <- plothrp2models(pop1 = hrp2map$results[[3]],
+                                      pop2 = hrp2map$results[[4]],
+                                      labels = c("Only RDT use", "50% RDT use")) #
+plot.scenario1.run2 <- plot.scenario1.run2 + ggtitle("hrp2 Simulation Scenario 1, Run 2")
+
+# now consider run 3
+plot.scenario1.run3 <- plothrp2models(pop1 = hrp2map$results[[5]],
+                                      pop2 = hrp2map$results[[6]],
+                                      labels = c("Only RDT use", "50% RDT use")) #
+plot.scenario1.run3 <- plot.scenario1.run3 + ggtitle("hrp2 Simulation Scenario 1, Run 3")
+
+# Plot them together
+cowplot::plot_grid(plot.scenario1.run1, 
+                   plot.scenario1.run2,
+                   plot.scenario1.run3,
+                   ncol=1)
+
+
+
+
+```
+
+
+
+## Discussion
+
+* Is this what you expected? Why or why not?
+* How do differences in diagnostics affect hrp2 prevalence?
+
+
+# Scenario 2: Different Fitness 
+Imagine that there are three populations, each with 2,000 individuals and each with the same, constant EIR of 1. In addition, all threepopulations only use RDTS, they always use the RDT result for treatment guidance, and all start with approximately 10% frequency of hrp2 deletions. However, the populations differ by:   
+
+**Population 1:**
+
+* Fitness is equal between hrp2-deleted and wildtype parasites
+
+**Population 2:**
+
+* Fitness cost of hrp2-deletion is approximately 0.5 compared to wildtype parasites
+  
+**Population 3:**
+
+* Fitness benefit of hrp2-deletion is 1.5 compared to wildtype parasites
+
+```{r, fig.width = 11, fig.height = 20}
+# going to overwrite our old hrp2map and make a new one
+
+hrp2map <- data.frame(scenario = "scnr2",
+                      population = c("pop1", "pop2", "pop3", "pop1", "pop2", "pop3"),  
+                      run = c(1,1,1,2,2,2),
+                      N=2000, 
+                      years=20, 
+                      strains.0 = 10,
+                      rdt.nonadherence = 0, 
+                      EIR=1/365, 
+                      microscopy.use = 0,
+                      rdt.det = 0,
+                      fitness = c(0.5, 1, 1.5, 0.5, 1, 1.5)
+                      )
+
+
+hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
+            hrp2_Simulation)
+
+plot.scenario2.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
+                                      pop2 = hrp2map$results[[2]],
+                                      pop3 = hrp2map$results[[3]],
+                                      labels = c("hrp2 Fitness 0.5", "hrp2 Fitness 1", "hrp2 Fitness 1.5")) 
+plot.scenario2.run1 <- plot.scenario2.run1 + ggtitle("hrp2 Simulation Scenario 2, Run 1")
+
+
+plot.scenario2.run2 <- plothrp2models(pop1 = hrp2map$results[[4]],
+                                      pop2 = hrp2map$results[[5]],
+                                      pop3 = hrp2map$results[[6]],
+                                      labels = c("hrp2 Fitness 0.5", "hrp2 Fitness 1", "hrp2 Fitness 1.5")) 
+plot.scenario2.run2 <- plot.scenario2.run2 + ggtitle("hrp2 Simulation Scenario 2, Run 2")
+
+cowplot::plot_grid(plot.scenario2.run1, plot.scenario2.run2,ncol=1)
+
+
+
+
+```
+
+
+### Discussion
+
+* Is this what you expected? Why or why not?
+* How does fitness after hrp2 prevalence? 
+* How would you expect this to change if there were differences in diagnostics between populations?
+
+
+# Scenario 3: Different EIR 
+Imagine that there are three populations, each with 2,000 individuals, and all populations only use RDTS, they always use the RDT result for treatment guidance, all start with approximately 10% frequency of hrp2 deletions, and the fitness of hrp2 parasites and wildtype parasites is equal. However, the populations differ by:   
+
+**Population 1:**
+
+* EIR is 1 
+
+**Population 2:**
+
+* EIR is 10
+  
+**Population 3:**
+
+* EIR is 100
+
+```{r, fig.width = 11, fig.height = 20}
+# going to overwrite our old hrp2map and make a new one
+
+hrp2map <- data.frame(scenario = "scnr3",
+                      population = c("pop1", "pop2", "pop3", "pop1", "pop2", "pop3"),  
+                      run = c(1,1,1,2,2,2),
+                      N=2000, 
+                      years=20, 
+                      strains.0 = 10,
+                      rdt.nonadherence = 0, 
+                      EIR=c(1/365, 10/365, 100/365, 1/365, 10/365, 100/365),
+                      microscopy.use = 0,
+                      rdt.det = 0,
+                      fitness = 1
+                      )
+
+
+hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
+            hrp2_Simulation)
+
+plot.scenario3.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
+                                      pop2 = hrp2map$results[[2]],
+                                      pop3 = hrp2map$results[[3]],
+                                      labels = c("EIR 1", "EIR 10", "EIR 100")) 
+plot.scenario3.run1 <- plot.scenario3.run1 + ggtitle("hrp2 Simulation Scenario 3, Run 1")
+
+
+plot.scenario3.run2 <- plothrp2models(pop1 = hrp2map$results[[4]],
+                                      pop2 = hrp2map$results[[5]],
+                                      pop3 = hrp2map$results[[6]],
+                                      labels = c("EIR 1", "EIR 10", "EIR 100")) 
+plot.scenario3.run2 <- plot.scenario3.run2 + ggtitle("hrp2 Simulation Scenario 3, Run 2")
+
+cowplot::plot_grid(plot.scenario3.run1, plot.scenario3.run2,ncol=1)
+
+
+
+
+```
+
+
+# Scenario 4: Reality 
+
+**Democratic Republic of the Congo (Sub-Saharan Africa)**
+  
+We are going to simulate the situation in the DRC, with the following assumptions:   
+* 10% of circulating P. falciparum parasites have an hrp2 gene deletion (strains.0 = 10)
+* 80% RDT use (microscopy.use = 0.2)
+* 20% RDT non-adherence, or people get treated even with a negative RDT result (rdt.nonadherence = 0.2)
+* EIR of 10/365
+* other parameters similar to above: N=2000, years=20, rdt.det=0, fitness=1
+   
+   
+**Brazil (South America)**
+  
+We are going to simulate the situation in the DRC, with the following assumptions:   
+* 20% of circulating P. falciparum parasites have an hrp2 gene deletion (strains.0 = 5)
+* 50% Microscopy use (microscopy.use = 0.5)
+* 20% RDT non-adherence, or people get treated even with a negative RDT result (rdt.nonadherence = 0.2)
+* EIR of 1/365
+* other parameters similar to above: N=2000, years=20, rdt.det=0, fitness=1
+
+```{r, fig.width = 11, fig.height = 15}
+hrp2map <- data.frame(scenario = "realworld",
+                      population = c("DRC", "BZ", "DRC", "BZ"),  
+                      run = c(1,1,2,2),
+                      N=2000, 
+                      years=20, 
+                      strains.0 = c(10,5,10,5),
+                      rdt.nonadherence = 0, 
+                      EIR=c(100/365, 1/365, 100/365, 1/365),
+                      microscopy.use = c(0.2, 0.5, 0.2, 0.5),  
+                      rdt.det = 0,
+                      fitness = 1
+                      )
+
+
+hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
+            hrp2_Simulation)
+
+plot.scenario4.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
+                                      pop2 = hrp2map$results[[2]],
+                                      labels = c("DRC", "BZ")) 
+plot.scenario4.run1 <- plot.scenario4.run1 + ggtitle("hrp2 Simulation Scenario 4, Run 1, Same Fitness")
+
+
+plot.scenario4.run2 <- plothrp2models(pop1 = hrp2map$results[[3]],
+                                      pop2 = hrp2map$results[[4]],
+                                      labels = c("DRC", "BZ")) 
+plot.scenario4.run2 <- plot.scenario4.run2 + ggtitle("hrp2 Simulation Scenario 4, Run 1, Same Fitness")
+
+
+
+cowplot::plot_grid(plot.scenario4.run1, 
+                   plot.scenario4.run2,ncol=1)
+
+
+
+
+```
+
