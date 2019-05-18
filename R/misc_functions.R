@@ -23,14 +23,14 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
   # conditionals
   if(!is.null(pop1)){
     ret1 <- data.frame(
-      pfprev =    pop1$S.Prev.All,
+      pfinc =    pop1$S.Incidence,
       hrp2prev =  pop1$S.N.Dels,
       time =      pop1$S.Times,
       pop = 1)
   }
   if(!is.null(pop2)){
     ret2 <- data.frame(
-      pfprev =    pop2$S.Prev.All,
+      pfinc =    pop2$S.Incidence,
       hrp2prev =  pop2$S.N.Dels,
       time =      pop2$S.Times,
       pop = 2)
@@ -38,7 +38,7 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
   }
   if(!is.null(pop3)){
     ret3 <- data.frame(
-      pfprev =    pop3$S.Prev.All,
+      pfinc =    pop3$S.Incidence,
       hrp2prev =  pop3$S.N.Dels,
       time =      pop3$S.Times,
       pop = 3)
@@ -46,7 +46,7 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
   }
   if(!is.null(pop4)){
     ret4 <- data.frame(
-      pfprev =    pop4$S.Prev.All,
+      pfinc =    pop4$S.Incidence,
       hrp2prev =  pop4$S.N.Dels,
       time =      pop4$S.Times,
       pop = 2)
@@ -76,3 +76,22 @@ plothrp2models <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NULL, l
 }
 
 
+
+
+#' @export
+plotincmodels <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NULL, labels = c("")){
+
+  ret <- extracthrp2results(pop1, pop2, pop3, pop4)
+  plt <- ret %>%
+    dplyr::mutate(pop = factor(pop)) %>%
+    ggplot() +
+    geom_line(aes(x=time, y=pfinc, color = factor(pop))) +
+    scale_color_manual(name = "", labels = labels, values = RColorBrewer::brewer.pal(8, "Set1")) +
+    xlab("Time (Days)") + ylab("Incidence") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust=0.5),
+      legend.position = "bottom"
+    )
+  return(plt)
+}

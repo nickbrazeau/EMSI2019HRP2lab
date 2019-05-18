@@ -51,7 +51,7 @@ Imagine that there are three populations with a constant EIR of 1 (reminder, EIR
 
 
 ### Output
-As noted above, the `hrp2_Simulation` function returns many results that allow for many different questions to be investigated. For the purpose of our excerise, we will focus on the increase of hrp2 prevalence (`df$S.N.Dels`) over time (`df$S.Times`). 
+As noted above, the `hrp2_Simulation` function returns many results that allow for many different questions to be investigated. For the purpose of our excerise, we will focus on the increase of hrp2 frequency (`df$S.N.Dels`) over time (`df$S.Times`) as well as incidence (`df$S.Incidence`) over time (`df$S.Times`)
   
 Let's run the code (once) and plot the result: 
 
@@ -63,37 +63,37 @@ Let's run the code (once) and plot the result:
 # as a side note, let's track how long this takes
 start_time <- Sys.time()
 
-senario1.pop1 <-  hrp2_Simulation(N=2000, 
-                                 years=20, 
-                                 strains.0 = 10,
-                                 rdt.nonadherence = 0, 
-                                 EIR=1/365, 
-                                 microscopy.use = 0, 
-                                 rdt.det = 0, 
-                                 fitness = 1
-)
+senario1.pop1 <- hrp2malaRia::hrp2_Simulation(N=2000, 
+                                                  years=20, 
+                                                  strains.0 = 10,
+                                                  rdt.nonadherence = 0, 
+                                                  EIR=1/365, 
+                                                  microscopy.use = 0, 
+                                                  rdt.det = 0, 
+                                                  fitness = 1
+                                                  )
 # Population 2
-senario1.pop2 <- hrp2_Simulation(N=2000, 
-                                 years=20, 
-                                 strains.0 = 10,
-                                 rdt.nonadherence = 0, 
-                                 EIR=1/365, 
-                                 microscopy.use = 0.5, 
-                                 rdt.det = 0, 
-                                 fitness = 1
-)
+senario1.pop2 <- hrp2malaRia::hrp2_Simulation(N=2000, 
+                                                  years=20, 
+                                                  strains.0 = 10,
+                                                  rdt.nonadherence = 0, 
+                                                  EIR=1/365, 
+                                                  microscopy.use = 0.5, 
+                                                  rdt.det = 0, 
+                                                  fitness = 1
+                                                  )
 
 
 # Population 3
-senario1.pop3 <-  hrp2_Simulation(N=2000, 
-                                 years=20, 
-                                 strains.0 = 10,
-                                 rdt.nonadherence = 0, 
-                                 EIR=1/365, 
-                                 microscopy.use = 1, 
-                                 rdt.det = 0, 
-                                 fitness = 1
-)
+senario1.pop3 <-  hrp2malaRia::hrp2_Simulation(N=2000, 
+                                                   years=20, 
+                                                   strains.0 = 10,
+                                                   rdt.nonadherence = 0, 
+                                                   EIR=1/365, 
+                                                   microscopy.use = 1, 
+                                                   rdt.det = 0, 
+                                                   fitness = 1
+                                                   )
 
 
 end_time <- Sys.time()
@@ -160,7 +160,7 @@ future::plan(multiprocess)
 start_time <- Sys.time()
 
 hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
-            hrp2_Simulation)
+            hrp2malaRia::hrp2_Simulation)
 
 end_time <- Sys.time()
 paralleltime <- start_time - end_time
@@ -169,7 +169,6 @@ paralleltime <- start_time - end_time
 ```
 
 Just to prove a point, check out how much faster your code ran in parallel versus sequentially:
-
 ```{r}
 sequentialtime
 paralleltime
@@ -181,22 +180,26 @@ Now let's visualize our plots of the proportion of _hrp2_ deleted parasites over
 # note, I wrote this function for you, it returns a ggplot
 plot.scenario1.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
                                       pop2 = hrp2map$results[[2]],
-                                      labels = c("Only RDT use", "50% RDT use")) # you need to manually add the labels
+                                      pop3 = hrp2map$results[[3]],
+                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use")) # you need to manually add the labels
 
 # you can manually add a title like this too 
 plot.scenario1.run1 <- plot.scenario1.run1 + ggtitle("hrp2 Simulation Scenario 1, Run 1")
 
 
 # now consider run 2
-plot.scenario1.run2 <- plothrp2models(pop1 = hrp2map$results[[3]],
-                                      pop2 = hrp2map$results[[4]],
-                                      labels = c("Only RDT use", "50% RDT use")) #
+plot.scenario1.run2 <- plothrp2models(pop1 = hrp2map$results[[4]],
+                                      pop2 = hrp2map$results[[5]],
+                                      pop3 = hrp2map$results[[6]],
+                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use"))
 plot.scenario1.run2 <- plot.scenario1.run2 + ggtitle("hrp2 Simulation Scenario 1, Run 2")
 
 # now consider run 3
-plot.scenario1.run3 <- plothrp2models(pop1 = hrp2map$results[[5]],
-                                      pop2 = hrp2map$results[[6]],
-                                      labels = c("Only RDT use", "50% RDT use")) #
+plot.scenario1.run3 <- plothrp2models(pop1 = hrp2map$results[[7]],
+                                      pop2 = hrp2map$results[[8]],
+                                      pop3 = hrp2map$results[[9]],
+                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use"))
+                                      
 plot.scenario1.run3 <- plot.scenario1.run3 + ggtitle("hrp2 Simulation Scenario 1, Run 3")
 
 # Plot them together
@@ -212,14 +215,62 @@ cowplot::plot_grid(plot.scenario1.run1,
 
 
 
-## Discussion
+** Questions for Simulation 1 with regards to _hrp2_ frequency**
 
-* Is this what you expected? Why or why not?
-* How do differences in diagnostics affect hrp2 prevalence?
+* How does the difference in diagnostic modality affect the proportion of _hrp2_ deletions? __________________
+* How much variation did you appreciate between runs? __________________________________
+
+* Was there anything unusual about your plots? Why was it unusual? _______________________________
+
+Try running the models for a sample size of 100,000 (like the ELife paper). Note, this will take some time but the larger N should elicit a clearer/more consistent pattern.    
+
+
+
+Now let's visualize our plots of the parasite Incidence over time. Incidence can be defined as the number of susceptible individuals that acquire an infection (at time $t$). 
+
+```{r, fig.width = 11, fig.height = 20}
+
+# note, I wrote this function for you, it returns a ggplot
+iplot.scenario1.run1 <- plotincmodels(pop1 = hrp2map$results[[1]],
+                                      pop2 = hrp2map$results[[2]],
+                                      pop3 = hrp2map$results[[3]],
+                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use")) 
+
+
+iplot.scenario1.run2 <- plotincmodels(pop1 = hrp2map$results[[4]],
+                                      pop2 = hrp2map$results[[5]],
+                                      pop3 = hrp2map$results[[6]],
+                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use"))
+
+
+iplot.scenario1.run3 <- plotincmodels(pop1 = hrp2map$results[[7]],
+                                      pop2 = hrp2map$results[[8]],
+                                      pop3 = hrp2map$results[[9]],
+                                      labels = c("Only RDT use", "50% RDT use", "0% RDT use"))
+                                      
+
+
+# Plot them together
+cowplot::plot_grid(iplot.scenario1.run1, 
+                   iplot.scenario1.run2,
+                   iplot.scenario1.run3,
+                   ncol=1)
+
+
+
+```
+
+** Questions for Simulation 1 with regards to Incidence **
+
+* How did difference in diagnostic modality affect the overall incidence of _P. falciparum_ malaria? __________________
+* How are incidence and proportion of _hrp2_ deletions related in these populations (in expectation)? __________________________________
+
+* Why does that matter? _______________________________
+
 
 
 # Scenario 2: Different Fitness 
-Imagine that there are three populations, each with 2,000 individuals and each with the same, constant EIR of 1. In addition, all threepopulations only use RDTS, they always use the RDT result for treatment guidance, and all start with approximately 10% frequency of hrp2 deletions. However, the populations differ by:   
+Again, imagine that there are three populations with a constant EIR of 1 (reminder, EIR is the entomogical innoculation rate, or the number of infectious mosquito bites per person per year). In addition, all populations start with approximately 10% frequency of hrp2 deletions and all populations only use RDTs for diagnostics. However, the populations differ by:  
 
 **Population 1:**
 
@@ -236,8 +287,7 @@ Imagine that there are three populations, each with 2,000 individuals and each w
 ```{r, fig.width = 11, fig.height = 20}
 # going to overwrite our old hrp2map and make a new one
 
-hrp2map <- data.frame(scenario = "scnr2",
-                      population = c("pop1", "pop2", "pop3", "pop1", "pop2", "pop3"),  
+hrp2map <- data.frame(
                       run = c(1,1,1,2,2,2),
                       N=2000, 
                       years=20, 
@@ -251,7 +301,7 @@ hrp2map <- data.frame(scenario = "scnr2",
 
 
 hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
-            hrp2_Simulation)
+            hrp2malaRia::hrp2_Simulation)
 
 plot.scenario2.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
                                       pop2 = hrp2map$results[[2]],
@@ -274,15 +324,23 @@ cowplot::plot_grid(plot.scenario2.run1, plot.scenario2.run2,ncol=1)
 ```
 
 
-### Discussion
+** Questions for Simulation 2 with regards to _hrp2_ frequency **
 
-* Is this what you expected? Why or why not?
-* How does fitness after hrp2 prevalence? 
-* How would you expect this to change if there were differences in diagnostics between populations?
+* How do the differences fitness affect _hrp2_ frequency? __________________
+* Were these effects greater than the effects of the diagnostic modality (above)? __________________________________
+  * Why (or why not) do you think that may be the case? ___________________________
+  * What are the differenes in a selective pressure vs. fitness? _________________________
+* Can a parasite that is less fit still propagate through the population (call forward to Dr. Mitchell/Dr. Nunn's lecture) ? _______________________________   
+
+
+**_If you have time, consider plotting the incidence for these simulations and compare them to scenario 1_**.
+
+
+
 
 
 # Scenario 3: Different EIR 
-Imagine that there are three populations, each with 2,000 individuals, and all populations only use RDTS, they always use the RDT result for treatment guidance, all start with approximately 10% frequency of hrp2 deletions, and the fitness of hrp2 parasites and wildtype parasites is equal. However, the populations differ by:   
+Again, imagine that there are three populations where all populations start with approximately 10% frequency of hrp2 deletions, hrp2-deleted and wildtype strains have the same fitness, and all populations only use RDTs for diagnostics. However, the populations differ by:  
 
 **Population 1:**
 
@@ -314,7 +372,7 @@ hrp2map <- data.frame(scenario = "scnr3",
 
 
 hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
-            hrp2_Simulation)
+           hrp2malaRia::hrp2_Simulation)
 
 plot.scenario3.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
                                       pop2 = hrp2map$results[[2]],
@@ -336,64 +394,37 @@ cowplot::plot_grid(plot.scenario3.run1, plot.scenario3.run2,ncol=1)
 
 ```
 
+** Questions for Simulation 3 with regards to _hrp2_ frequency **
 
-# Scenario 4: Reality 
-
-**Democratic Republic of the Congo (Sub-Saharan Africa)**
-  
-We are going to simulate the situation in the DRC, with the following assumptions:   
-* 10% of circulating P. falciparum parasites have an hrp2 gene deletion (strains.0 = 10)
-* 80% RDT use (microscopy.use = 0.2)
-* 20% RDT non-adherence, or people get treated even with a negative RDT result (rdt.nonadherence = 0.2)
-* EIR of 10/365
-* other parameters similar to above: N=2000, years=20, rdt.det=0, fitness=1
-   
-   
-**Brazil (South America)**
-  
-We are going to simulate the situation in the DRC, with the following assumptions:   
-* 20% of circulating P. falciparum parasites have an hrp2 gene deletion (strains.0 = 5)
-* 50% Microscopy use (microscopy.use = 0.5)
-* 20% RDT non-adherence, or people get treated even with a negative RDT result (rdt.nonadherence = 0.2)
-* EIR of 1/365
-* other parameters similar to above: N=2000, years=20, rdt.det=0, fitness=1
-
-```{r, fig.width = 11, fig.height = 15}
-hrp2map <- data.frame(scenario = "realworld",
-                      population = c("DRC", "BZ", "DRC", "BZ"),  
-                      run = c(1,1,2,2),
-                      N=2000, 
-                      years=20, 
-                      strains.0 = c(10,5,10,5),
-                      rdt.nonadherence = 0, 
-                      EIR=c(100/365, 1/365, 100/365, 1/365),
-                      microscopy.use = c(0.2, 0.5, 0.2, 0.5),  
-                      rdt.det = 0,
-                      fitness = 1
-                      )
+* How do the differences EIR affect _hrp2_ frequency? __________________
+  * Do any of the models seem odd (e.g. are any "overwhelmed")? _________________________
+* Compare these effects with the effects above (above)? __________________________________
+  * Why do you a high EIR results in so few _hrp2_-deleted parasites? ___________________________
+  * Is there a parameter that we could change in our simulation that would allow for a high EIR and still produce a high proportion of _hrp2_-deleted parasites? _________________________
 
 
-hrp2map$results <- furrr::future_pmap(hrp2map[,c("N", "years", "strains.0", "rdt.nonadherence", "EIR", "microscopy.use", "rdt.det", "fitness")], 
-            hrp2_Simulation)
 
-plot.scenario4.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
+Now let's visualize our plots of the parasite Incidence over time. Incidence can be defined as the number of susceptible individuals that acquire an infection (at time $t$).   
+
+Without looking at the models below, which population is going to have the highest incidence? ________________ 
+
+
+```{r, fig.width = 11, fig.height = 20}
+
+iplot.scenario3.run1 <- plotincmodels(pop1 = hrp2map$results[[1]],
                                       pop2 = hrp2map$results[[2]],
-                                      labels = c("DRC", "BZ")) 
-plot.scenario4.run1 <- plot.scenario4.run1 + ggtitle("hrp2 Simulation Scenario 4, Run 1, Same Fitness")
+                                      pop3 = hrp2map$results[[3]],
+                                      labels = c("EIR 1", "EIR 10", "EIR 100")) 
 
+iplot.scenario3.run2 <- plotincmodels(pop1 = hrp2map$results[[4]],
+                                      pop2 = hrp2map$results[[5]],
+                                      pop3 = hrp2map$results[[6]],
+                                      labels = c("EIR 1", "EIR 10", "EIR 100")) 
 
-plot.scenario4.run2 <- plothrp2models(pop1 = hrp2map$results[[3]],
-                                      pop2 = hrp2map$results[[4]],
-                                      labels = c("DRC", "BZ")) 
-plot.scenario4.run2 <- plot.scenario4.run2 + ggtitle("hrp2 Simulation Scenario 4, Run 1, Same Fitness")
-
-
-
-cowplot::plot_grid(plot.scenario4.run1, 
-                   plot.scenario4.run2,ncol=1)
-
+cowplot::plot_grid(iplot.scenario3.run1, iplot.scenario3.run2, ncol=1)
 
 
 
 ```
+
 

@@ -3,4 +3,5 @@
 export(extracthrp2results)
 export(hrp2_Simulation)
 export(plothrp2models)
+export(plotincmodels)
 export(quiet)
