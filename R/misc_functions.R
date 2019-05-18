@@ -6,6 +6,7 @@ quiet <- function(x) {
   invisible(force(x))
 }
 
+#' @export
 hrp2_Simulation <- function(...){
   quiet(hrp2malaRia::hrp2_Simulation(...))
 }
