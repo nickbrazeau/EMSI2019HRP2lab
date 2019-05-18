@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/37755037/how-to-add-code-folding-to-output-c
 <script src="js/hideAll.js"></script>
 
 # Acknowledgements
-The `hrp2malaRia` package was written by [OJ Watson](https://github.com/OJWatson), a PhD Student with the Imperial College of London Mathematical Modeling group. This package was used in his recent [Elife Publication](https://www.ncbi.nlm.nih.gov/pubmed/28837020), Watson OJ _et al._ 2017, **Modelling the drivers of the spread of Plasmodium falciparum hrp2 gene deletions in sub-Saharan Africa**. The udeas and much of theory that we will be discussing today was spear-headed by UNC Physician-Scientist, Jonathan Parr. 
+The `hrp2malaRia` package was written by [OJ Watson](https://github.com/OJWatson), a PhD Student with the Imperial College of London Mathematical Modeling group. This package was used in his recent [Elife Publication](https://www.ncbi.nlm.nih.gov/pubmed/28837020), Watson OJ _et al._ 2017, **Modelling the drivers of the spread of Plasmodium falciparum hrp2 gene deletions in sub-Saharan Africa**. The ideas and much of theory that we will be discussing today was spear-headed by UNC Physician-Scientist, Jonathan Parr. 
     
 Additional thanks to Dayne Filer, Mike Fliss, and Sara Levintow for hacks.
   
@@ -71,7 +71,7 @@ RDTs detect parasite antigens (e.g. a parasite-specific marker) from the patient
   
 However, recent evidence has accumulated to suggest that _P. falciparum_ parasites have undergone selection for hrp2-gene deletions, making them no longer detectable by many RDTs ("stealth parasites"). In theory, by avoiding detection, parasites can then remain untreated and have a higher likelihood of spreading. 
   
-Note, for the purposes of our discussions, we will ignore differences between the lower-limits of detection (and sensitivity/speficity) of these two diagnostic modalities. 
+Note, for the purposes of our discussions, we will ignore differences between the lower-limits of detection (and sensitivity/specificity) of these two diagnostic modalities. 
   
 <!-- Note, here I am using some css code to make columns and insert figures -->
 
@@ -86,7 +86,7 @@ Note, for the purposes of our discussions, we will ignore differences between th
 ## Prevalence & Multiplicity of Infection
 In regions of high malaria prevalence, it is common for individuals to experience numerous innocuous bites every single evening. For example, in the Democratic Republic of the Congo, it is estimated that the average individual experiences [60-400 infectious mosquito bites/person/year*](https://www.pmi.gov/docs/default-source/default-document-library/malaria-operational-plans/fy-2018/fy-2018-democratic-republic-of-the-congo-malaria-operational-plan.pdf?sfvrsn=5). As a result of this intense burden, individuals can be infected with numerous different strains of malaria (termed "superinfection" -- note, for the purpose of this thought exercise we will ignore "co-transmission" events). 
   
-* The number of infectious moquito bites per person per year is often termed the entomological innoculation rate (EIR) and is a measure of transmission intensity.
+* The number of infectious mosquito bites per person per year is often termed the entomological inoculation rate (EIR) and is a measure of transmission intensity.
   
   
 <center><img src="figures/superinfection_figure.png" width="400px" height = "400px"><center>
@@ -94,8 +94,7 @@ In regions of high malaria prevalence, it is common for individuals to experienc
 
 
 # Exercise Objectives
-In this lab, we are going to explore different scenarios where hrp2 deletions are expected to increase in frequency (e.g. be "selected for") or decrease in frequency (e.g. be "selected against").
-**Blah. Blah.**
+In this lab, we are going to explore different scenarios where hrp2 deletions are expected to increase in frequency (e.g. be "selected for") or decrease in frequency (e.g. be "selected against"). We will also explore the consequences of these increases through an epidemiological lens. 
 
 
 ## Hypothesis Generating
@@ -116,18 +115,18 @@ Before we began, discuss the following points with your neighbors (or as a group
 
 
 ## Model Specification
-In the previous exercise led by Dr. Nunn, you first used a determinist SIR model to analyze the spread of a "childhood disease" through a susceptible population. You then extended your deterministic SIR model to include fluctuations in the population size through births and deaths (e.g. a demographic model). Next, you modeled the uncertainty and the variation in your model through simulation using a stochastic approach. As a reminder, stochastic individual-based models essentially follow indiviudals through the different compartments and record their states/times as they move through the model. This explicitly models individual-level heterogeneity and allows for several possible extension/fine-level manipulations (e.g. see [network stochastic models](http://statnet.github.io/tut/NewNet.html), etc.) In short, a deterministic model is a "closed-system" where we will arrive at the same answer every time (given the same parameters, initial conditions, etc). In contrast, a stochastic model let's us simulate many possible iterations of our model and directly express the randomness (or really uncertainty) in our model paramters and outcome. 
+In the previous exercise led by Dr. Nunn, you first used a deterministic SIR model to analyze the spread of a "childhood disease" through a susceptible population. You then extended your deterministic SIR model to include fluctuations in the population size through births and deaths (e.g. a demographic model). Next, you modeled the uncertainty and the variation in your model through simulation using a stochastic approach. As a reminder, stochastic individual-based models essentially follow individuals through the different compartments and record their states/times as they move through the model. This explicitly models individual-level heterogeneity and allows for several possible extension/fine-level manipulations (e.g. see [network stochastic models](http://statnet.github.io/tut/NewNet.html), etc.) In short, a deterministic model is a "closed-system" where we will arrive at the same answer every time (given the same parameters, initial conditions, etc). In contrast, a stochastic model let's us simulate many possible iterations of our model and directly express the randomness (or really uncertainty) in our model parameters and outcome. 
 
 In this exercise, we are going to use an individual-based, stochastic malaria transmission model that is an extension of the "Imperial Model" (see OJ's [Material & Methods](https://www.ncbi.nlm.nih.gov/pubmed/28837020)) for a full description via Griffin et al. 2014, 2015, 2016) OJ describes the Imperial Model fully.    
   
 Refer to Figure 5 from OJ's [manuscript](https://www.ncbi.nlm.nih.gov/pubmed/28837020). What kind of Compartment Model is the "hrp2-Imperial Model"? ______________________   
   
-Note, for the purpose of this exercise, we are going to ignore some of the (beautiful) complexities of the model and instead talk about this model in a Susceptible-Infected-Recovered-Susceptible framework (i.e. the U,A,D compartments are collapsed into the "Infected" category and Recovered corresponds to the period of active treatment/prophylaxis -- the T,P compartments -- when individusls are "immune"). What is another scenario that SIRS models can be applied to (hint: think about your tetanus vaccines)? __________________  
+Note, for the purpose of this exercise, we are going to ignore some of the (beautiful) complexities of the model and instead talk about this model in a Susceptible-Infected-Recovered-Susceptible framework (i.e. the U,A,D compartments are collapsed into the "Infected" category and Recovered corresponds to the period of active treatment/prophylaxis -- the T,P compartments -- when individuals are "immune"). What is another scenario that SIRS models can be applied to (hint: think about your tetanus vaccines)? __________________  
 We are going to be focusing on a few adaptations of "hrp2-Imperial Model", namely:  
 
 1. The addition of the parameter, $f\epsilon_T$, or "the probability that the clinical case yields a positive diagnostic result and subsequently receives treatment". Essentially, this parameter accounts for our "belief" in the RDTs by saying "given that you have clinical disease, will you go get treatment based on your RDT result"*. 
-2. The contribution of _hrp2_ deleted versus wildtype strains to the mosquito infectious reservior (i.e. $C_D$, $C_U$, $C_T$).
-3. The fitness of the _hrp2_ deleted versus wildtype strains. This parameter is modeled directly into the probability that a mosquito can transmit an _hrp2_ deleted parasite. Put simply, this essentially follows the classical defintion of fitness, as a probability that a given "gene" (here an hrp2 gene deletion) is passed on in subsquent generations. 
+2. The contribution of _hrp2_ deleted versus wildtype strains to the mosquito infectious reservoir (i.e. $C_D$, $C_U$, $C_T$).
+3. The fitness of the _hrp2_ deleted versus wildtype strains. This parameter is modeled directly into the probability that a mosquito can transmit an _hrp2_ deleted parasite. Put simply, this essentially follows the classical definition of fitness, as a probability that a given "gene" (here an hrp2 gene deletion) is passed on in subsequent generations. 
 
 
 
@@ -148,7 +147,7 @@ This is copied from the [README]() that accompanies the `hrp2malaria` package in
 |----------|-------------------------------------------------------------------------------|
 | *years* | Number of years simulation is run for. 20 years will be usually long enough to see hrp2 selection at low EIRs. |
 | *N* | Population size. The model is stochastic and so a larger N will enable clearer patterns to be found in model outputs, however, they will take longer to run. Population of 2000 should be a good balance of speed and clarity for demonstration purposes. For the analysis in the eLife modelling paper N was set to 100,000 |
-| *strains.0* | Starting ratio of strains in the population. This number must be an integer. The default is set to 10, which will mean that on initialisation there will be roughly 10 times as many wild type strains as there are hrp2 deleted. |
+| *strains.0* | Starting ratio of strains in the population. This number must be an integer. The default is set to 10, which will mean that on initialization there will be roughly 10 times as many wild type strains as there are hrp2 deleted. |
 | *EIR* | Annual EIR, provided as a fraction, i.e. the default EIR of 20/365 represents an EIR of 20. |
 | *ft* | Frequency of treatment being sought upon developing clinical disease. Must be a number between 0 and 1, with the default being 0.4, i.e. 40% of cases seek treatment. |
 | *rdt.det* | The probability that an individual only infected with hrp2-deleted strains still produces a positive RDT. The default is 1, i.e. no selective pressure. For the eLife paper we used a value of 0.25 that represented the approximate 25% chance that a positive RDT would still be produced due to hrp3 protein epitope cross reactivity |
@@ -202,7 +201,7 @@ set.seed(42) # please don't run this line!
 
 
 # Scenario 1: Different Diagnostics 
-Imagine that there are three populations with a constant EIR of 1 (reminder, EIR is the entomogical innoculation rate, or the number of infectious mosquito bites per person per year). In addition, all populations start with approximately 10% frequency of hrp2 deletions and hrp2 deleted and wildtype parasites have equal fitness. However, the populations differ by:  
+Imagine that there are three populations with a constant EIR of 1 (reminder, EIR is the entomological inoculation rate, or the number of infectious mosquito bites per person per year). In addition, all populations start with approximately 10% frequency of hrp2 deletions and hrp2 deleted and wildtype parasites have equal fitness. However, the populations differ by:  
   
 **Population 1:**
 
@@ -219,7 +218,7 @@ Imagine that there are three populations with a constant EIR of 1 (reminder, EIR
 
 
 ### Output
-As noted above, the `hrp2_Simulation` function returns many results that allow for many different questions to be investigated. For the purpose of our excerise, we will focus on the increase of hrp2 frequency (`df$S.N.Dels`) over time (`df$S.Times`) as well as incidence (`df$S.Incidence`) over time (`df$S.Times`)
+As noted above, the `hrp2_Simulation` function returns many results that allow for many different questions to be investigated. For the purpose of our exercise, we will focus on the increase of hrp2 frequency (`df$S.N.Dels`) over time (`df$S.Times`) as well as incidence (`df$S.Incidence`) over time (`df$S.Times`)
   
 Let's run the code (once) and plot the result: 
 
@@ -296,7 +295,7 @@ Why do you think stochastic models are typically slower to run than deterministi
   
   
 #### More Advanced Content
-We are going to use the `furrr` package to take advantage of the multiple proccessors on your computer (e.g. parallelize the simulations). This is simply for speed. If you are having trouble on your personal computer, you can change the `furrr::future_pmap` commands below to `purrr::pmap` and will get the same result (albiet at a slower pace). 
+We are going to use the `furrr` package to take advantage of the multiple processors on your computer (e.g. parallelize the simulations). This is simply for speed. If you are having trouble on your personal computer, you can change the `furrr::future_pmap` commands below to `purrr::pmap` and will get the same result (albeit at a slower pace). 
   
   
 Let's try it out below: 
@@ -390,12 +389,12 @@ cowplot::plot_grid(plot.scenario1.run1,
 
 * Was there anything unusual about your plots? Why was it unusual? _______________________________
 
-Try running the models for a sample size of 100,000 (like the ELife paper). Note, this will take some time but the larger N should elicit a clearer/more consistent pattern.    
+Try running the models for a sample size of 100,000 (like the eLife paper). Note, this will take some time but the larger N should elicit a clearer/more consistent pattern.    
 
 
 
 # Scenario 2: Different Fitness 
-Again, imagine that there are three populations with a constant EIR of 1 (reminder, EIR is the entomogical innoculation rate, or the number of infectious mosquito bites per person per year). In addition, all populations start with approximately 10% frequency of hrp2 deletions and all populations only use RDTs for diagnostics. However, the populations differ by:  
+Again, imagine that there are three populations with a constant EIR of 1 (reminder, EIR is the entomological inoculation rate, or the number of infectious mosquito bites per person per year). In addition, all populations start with approximately 10% frequency of hrp2 deletions and all populations only use RDTs for diagnostics. However, the populations differ by:  
 
 **Population 1:**
 
@@ -454,7 +453,7 @@ cowplot::plot_grid(plot.scenario2.run1, plot.scenario2.run2,ncol=1)
 * How do the differences fitness affect _hrp2_ frequency? __________________
 * Were these effects greater than the effects of the diagnostic modality (above)? __________________________________
   * Why (or why not) do you think that may be the case? ___________________________
-  * What are the differenes in a selective pressure vs. fitness? _________________________
+  * What are the differences in a selective pressure vs. fitness? _________________________
 * Can a parasite that is less fit still propagate through the population (call forward to Dr. Mitchell/Dr. Nunn's lecture) ? _______________________________   
 
 
@@ -639,11 +638,11 @@ left_join(pop1, pop2, by = "time") %>%
 
 #### Questions with regards to Incidence Plot 
 
-* What is your interpretation of the Incidence Diffference Plot Above? _______________________
+* What is your interpretation of the Incidence Difference Plot Above? _______________________
 * Can we say these are the cases that are due to RDT use vs Microscopy Use? ________________  
 
 
-On your own, alter the simulation (e.g. vary EIR, etc.). How does the incidene difference plot change? What should you tell your Ministry of Health Official friend?
+On your own, alter the simulation (e.g. vary EIR, etc.). How does the incidence difference plot change? What should you tell your Ministry of Health Official friend?
    
 One thing to consider is the "cost" of a missed infection (e.g. an individual with _hrp2_ deleted parasites that was misdiagnosed by RDT, a "false-negative"), which is not reflected in the incidence plot above. Let's look at that below (under the assumption that no cases were missed by microscopy under our model). 
 
