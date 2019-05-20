@@ -23,35 +23,35 @@ extracthrp2results <- function(pop1 = NULL, pop2 = NULL, pop3 = NULL, pop4 = NUL
   # conditionals
   if(!is.null(pop1)){
     ret1 <- data.frame(
-      pfinc =    pop1$S.Incidence,
-      hrp2prev =  pop1$S.N.Dels,
-      hrp2prevmono = pop1$S.Prev.Mono.D,
+      pfinc =    pop1$S.Incidence.05,
+      hrp2prev =  pop1$S.N.Dels.05,
+      hrp2prevmono = pop1$S.Prev.Mono.D.05,
       time =      pop1$S.Times,
       pop = 1)
   }
   if(!is.null(pop2)){
     ret2 <- data.frame(
-      pfinc =    pop2$S.Incidence,
-      hrp2prev =  pop2$S.N.Dels,
-      hrp2prevmono = pop2$S.Prev.Mono.D,
+      pfinc =    pop2$S.Incidence.05,
+      hrp2prev =  pop2$S.N.Dels.05,
+      hrp2prevmono = pop2$S.Prev.Mono.D.05,
       time =      pop2$S.Times,
       pop = 2)
 
   }
   if(!is.null(pop3)){
     ret3 <- data.frame(
-      pfinc =    pop3$S.Incidence,
-      hrp2prev =  pop3$S.N.Dels,
-      hrp2prevmono = pop3$S.Prev.Mono.D,
+      pfinc =    pop3$S.Incidence.05,
+      hrp2prev =  pop3$S.N.Dels.05,
+      hrp2prevmono = pop3$S.Prev.Mono.D.05,
       time =      pop3$S.Times,
       pop = 3)
 
   }
   if(!is.null(pop4)){
     ret4 <- data.frame(
-      pfinc =    pop4$S.Incidence,
-      hrp2prev =  pop4$S.N.Dels,
-      hrp2prevmono = pop4$S.Prev.Mono.D,
+      pfinc =    pop4$S.Incidence.05.05,
+      hrp2prev =  pop4$S.N.Dels.05,
+      hrp2prevmono = pop4$S.Prev.Mono.D.05,
       time =      pop4$S.Times,
       pop = 2)
 
