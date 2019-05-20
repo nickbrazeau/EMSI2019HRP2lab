@@ -288,7 +288,7 @@ hrp2map$results <- furrr::future_pmap(hrp2map[, !colnames(hrp2map) %in% "run"], 
 
 
 Now let's visualize our plots of the proportion of _hrp2_-deleted parasites over time.
-```{r, fig.width = 11, fig.height = 11}
+```{r, fig.width = 11, fig.height = 15}
 
 # note, I wrote this function for you, it returns a ggplot
 plot.scenario1.run1 <- plothrp2models(pop1 = hrp2map$results[[1]],
@@ -484,7 +484,7 @@ For the last time, imagine that there are three populations with a constant EIR 
 \* Our group has hypothesized that _hrp2_-deleted parasites are less virulent and therefore more likely to contribute to the asymptomatic reservoir. We have modeled that here as a "boost" in fitness, as OJ's model codes fitness as "the probability that a strain is selected from the infectious pool". As such, we can increase or decrease the probability that the _hrp2_-deleted strain or the WT strain is propagated forward-in-time by our model (NB, this is a classic definition of fitness). Note, this is a bit of an abstraction from OJ's original model/fitness parameter.
 
 
-```{r, fig.width = 11, fig.height = 20}
+```{r, fig.width = 11, fig.height = 11}
 # going to overwrite our old hrp2map and make a new one
 
 hrp2map <- data.frame(
